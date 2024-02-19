@@ -122,34 +122,38 @@ public class LinearProgrammingController {
                 try {
                     int number = Integer.parseInt(numConstraints.getText());
                     // Validate if the number is less than 20
-                    if (number < 20 && number > table.getItems().size() - 1) {
-                        //Add some rows
-                        for (int i = table.getItems().size() - 1; i < number; i++) {
-                            List<Double> decisions = Lists.newArrayList();
-                            for (int j = 0; j < Integer.parseInt(String.valueOf(numDecisions.getText())); j++) {
-                                decisions.add(0.0);
+                    if (number > 0) {
+                        if (number < 20 && number > table.getItems().size() - 1) {
+                            //Add some rows
+                            for (int i = table.getItems().size() - 1; i < number; i++) {
+                                List<Double> constraints = Lists.newArrayList();
+                                for (int j = 0; j < Integer.parseInt(String.valueOf(numDecisions.getText())); j++) {
+                                    constraints.add(0.0);
+                                }
+                                Row row = new Row("Constraint " + (i + 1), constraints, Row.Operator.LESS, 0.0);
+                                table.getItems().add(row);
                             }
-                            Row row = new Row("Constraint " + (i + 1), decisions, Row.Operator.LESS, 0.0);
-                            table.getItems().add(row);
+                        } else if (number < 20 && number < table.getItems().size() - 1) {
+                            //remove some rows
+                            int diff = (table.getItems().size() - 1) - number;
+                            int startIndex = table.getItems().size() - diff;
+                            List<Row> subList = table.getItems().subList(startIndex, table.getItems().size());
+                            table.getItems().removeAll(subList);
+                        } else if (number < 20 && number == table.getItems().size() - 1) {
+                            System.out.println("Table is equal to the size");
+                        } else {
+                            // Custom logic for invalid input
+                            System.out.println("Invalid input: Number must be less than 20");
+                            int rows = table.getItems().size() - 1;
+                            numConstraints.setText(String.valueOf(rows));
                         }
-                    } else if (number < 20 && number < table.getItems().size() - 1) {
-                        //remove some rows
-                        int diff = (table.getItems().size() - 1) - number;
-                        int startIndex = table.getItems().size() - diff;
-                        List<Row> subList = table.getItems().subList(startIndex, table.getItems().size());
-                        table.getItems().removeAll(subList);
-                    } else if (number < 20 && number == table.getItems().size() - 1) {
-                        System.out.println("Table is equal to the size");
-                    } else {
-                        // Custom logic for invalid input
-                        System.out.println("Invalid input: Number must be less than 20");
-                        numConstraints.setText("2");
                     }
                 } catch (NumberFormatException e) {
                     System.out.println(e);
                     System.out.println("Invalid input: Please enter a valid number");
                     // Set the value to 2 if validation fails
-                    numConstraints.setText("2");
+                    int rows = table.getItems().size() - 1;
+                    numConstraints.setText(String.valueOf(rows));
                 }
             }
         });
@@ -159,17 +163,35 @@ public class LinearProgrammingController {
             if (!numDecisions.isFocused()) {
                 try {
                     int number = Integer.parseInt(numDecisions.getText());
-                    if (number < 20) {
-                        table.getColumns().add(new TableColumn<>("X3"));
+                    if (number > 0) {
+                        if (number < 20 && number > table.getColumns().size() - 3) {
+                            //Add some columns
+                            for (int i = table.getColumns().size() - 3; i < number; i++) {
+                                TableColumn tableColumn = new TableColumn<>("X" + (i + 1));
+                                table.getColumns().add(i + 1, tableColumn);
+                            }
+                        } else if (number < 20 && number < table.getColumns().size() - 3) {
+                            //remove some columns
+                            int diff = (table.getColumns().size() - 1) - number;
+                            int startIndex = table.getColumns().size() - diff;
+                            List<TableColumn<Row, ?>> subList = table.getColumns().subList(startIndex, table.getColumns().size() - 2);
+                            table.getColumns().removeAll(subList);
+                        } else {
+                            System.out.println("Invalid input: Number must be less than 20");
+                            int columns = table.getColumns().size() - 3;
+                            numDecisions.setText(String.valueOf(columns));
+                        }
                     }
                 } catch (NumberFormatException e) {
                     System.out.println(e);
                     System.out.println("Invalid input: Please enter a valid number");
                     // Set the value to 2 if validation fails
-                    numDecisions.setText("2");
+                    int columns = table.getColumns().size() - 3;
+                    numDecisions.setText(String.valueOf(columns));
                 }
             }
         });
+        
     }
 
     public void enableTabbing() {
