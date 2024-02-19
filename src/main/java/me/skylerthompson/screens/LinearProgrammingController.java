@@ -1,26 +1,21 @@
 package me.skylerthompson.screens;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
-import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import me.skylerthompson.screens.linear.Row;
-import org.apache.commons.lang3.math.NumberUtils;
+import me.skylerthompson.utils.AcceptOnExitTableCell;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class LinearProgrammingController {
     public TextField title;
@@ -41,6 +36,7 @@ public class LinearProgrammingController {
         populateTable();
         enableTabbing();
         handleEvents();
+        setupRadioButtons();
     }
 
     public void populateTable() {
@@ -221,6 +217,12 @@ public class LinearProgrammingController {
                 }
             }
         });
+    }
+
+    public void setupRadioButtons() {
+        ToggleGroup toggleGroup = new ToggleGroup();
+        minimize.setToggleGroup(toggleGroup);
+        maximize.setToggleGroup(toggleGroup);
     }
 
     /*
