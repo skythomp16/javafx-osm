@@ -1,10 +1,18 @@
 package me.skylerthompson.screens;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.ortools.Loader;
+import com.google.ortools.linearsolver.MPConstraint;
+import com.google.ortools.linearsolver.MPObjective;
+import com.google.ortools.linearsolver.MPSolver;
+import com.google.ortools.linearsolver.MPVariable;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -12,13 +20,15 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
+import me.skylerthompson.or.LinearSolver;
 import me.skylerthompson.screens.linear.Row;
 import me.skylerthompson.utils.AcceptOnExitTableCell;
 
 import java.util.List;
+import java.util.Map;
 
 public class LinearProgrammingController {
-    public TextField title;
+    public TextField titleField;
     public TextField numDecisions;
     public TextField numConstraints;
     public RadioButton minimize;
@@ -31,6 +41,7 @@ public class LinearProgrammingController {
     public TableColumn<Row, Number> decision2Column;
     public TableColumn<Row, Row.Operator> operatorColumn;
     public TableColumn<Row, Number> rhsColumn;
+    public MenuItem solveButton1;
 
     public void initialize() {
         populateTable();
@@ -187,6 +198,13 @@ public class LinearProgrammingController {
                 }
             }
         });
+
+        solveButton1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                solve();
+            }
+        });
         
     }
 
@@ -240,5 +258,75 @@ public class LinearProgrammingController {
         }
     }
      */
+
+    public void solve() {
+        //Get basic information about the problem
+        String title = titleField.getText();
+        int numVariables = Integer.parseInt(String.valueOf(numDecisions.getText()));
+        boolean isMaximization = maximize.isSelected();
+        boolean isMinimization = minimize.isSelected();
+
+        // Solve the problem
+        Loader.loadNativeLibraries();
+        MPSolver solver = MPSolver.createSolver("GLOP");
+        double infinity = Double.POSITIVE_INFINITY;
+
+        List<MPVariable> variables = Lists.newArrayList();
+        for (int i = 0; i < numVariables; i++) {
+            MPVariable var = solver.makeNumVar(0.0, infinity, "x" + (i + 1));
+            variables.add(var);
+        }
+        MPObjective objective = solver.objective();
+
+        // Use the table data
+        List<MPConstraint> constraints = Lists.newArrayList();
+        List<Row> items = table.getItems();
+        for (int i = 0; i < items.size(); i++) {
+            Row row = items.get(i);
+            if (i == 0) {
+                for (int j = 0; j < numVariables; j++) {
+                    objective.setCoefficient(variables.get(j), row.getDecisions().get(j));
+                }
+                if (isMinimization) {
+                    objective.setMinimization();
+                } else if (isMaximization) {
+                    objective.setMaximization();
+                } else {
+                    System.out.println("Max/Min not set!  Defaulting to max!");
+                    objective.setMaximization();
+                }
+            } else {
+
+                //TODO: Handle equal type
+                MPConstraint c;
+                if (row.getOperator() == Row.Operator.LESS) {
+                    c = solver.makeConstraint(-infinity, row.getRhs(), "c" + i);
+                } else {
+                    c = solver.makeConstraint(row.getRhs(), infinity, "c" + i);
+                }
+                for (int j = 0; j < numVariables; j++) {
+                    c.setCoefficient(variables.get(j), row.getDecisions().get(j));
+                }
+                constraints.add(c);
+            }
+        }
+
+        final MPSolver.ResultStatus resultStatus = solver.solve();
+
+        if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
+            System.out.println("Solution:");
+            System.out.println("Objective value = " + objective.value());
+            for (MPVariable var : variables) {
+                System.out.println(var.name() + " = " + var.solutionValue());
+            }
+
+        } else {
+            System.err.println("The problem does not have an optimal solution!");
+        }
+
+        System.out.println("\nAdvanced usage:");
+        System.out.println("Problem solved in " + solver.wallTime() + " milliseconds");
+        System.out.println("Problem solved in " + solver.iterations() + " iterations");
+    }
 
 }
