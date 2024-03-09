@@ -1,4 +1,4 @@
-package me.skylerthompson.or;
+package edu.uca.or;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

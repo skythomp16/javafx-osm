@@ -1,12 +1,12 @@
-package me.skylerthompson.screens;
+package edu.uca.screens;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPConstraint;
 import com.google.ortools.linearsolver.MPObjective;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
+import edu.uca.screens.linear.Row;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -23,13 +23,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
-import me.skylerthompson.or.LinearSolver;
-import me.skylerthompson.screens.linear.Row;
-import me.skylerthompson.utils.AcceptOnExitTableCell;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 public class LinearProgrammingController {
     public TextField titleField;

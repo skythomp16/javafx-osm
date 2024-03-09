@@ -1,4 +1,4 @@
-package me.skylerthompson;
+package edu.uca;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

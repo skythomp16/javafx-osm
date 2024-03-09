@@ -1,4 +1,4 @@
-package me.skylerthompson.screens.linear;
+package edu.uca.screens.linear;
 
 import javafx.util.StringConverter;
 

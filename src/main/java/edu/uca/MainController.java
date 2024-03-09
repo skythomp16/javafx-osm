@@ -1,4 +1,4 @@
-package me.skylerthompson;
+package edu.uca;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

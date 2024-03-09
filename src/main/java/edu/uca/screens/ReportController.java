@@ -1,4 +1,4 @@
-package me.skylerthompson.screens;
+package edu.uca.screens;
 
 import com.google.common.collect.Maps;
 import javafx.event.ActionEvent;
