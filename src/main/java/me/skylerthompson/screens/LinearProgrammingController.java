@@ -13,17 +13,21 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
 import me.skylerthompson.or.LinearSolver;
 import me.skylerthompson.screens.linear.Row;
 import me.skylerthompson.utils.AcceptOnExitTableCell;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -296,8 +300,6 @@ public class LinearProgrammingController {
                     objective.setMaximization();
                 }
             } else {
-
-                //TODO: Handle equal type
                 MPConstraint c;
                 if (row.getOperator() == Row.Operator.LESS) {
                     c = solver.makeConstraint(-infinity, row.getRhs(), "c" + i);
@@ -313,20 +315,59 @@ public class LinearProgrammingController {
 
         final MPSolver.ResultStatus resultStatus = solver.solve();
 
+        // Now, generate the information to create the report
+        double objectiveValue = 0;
+        StringBuilder solutionValues = new StringBuilder();
+        boolean optimalSolution = false;
         if (resultStatus == MPSolver.ResultStatus.OPTIMAL) {
-            System.out.println("Solution:");
-            System.out.println("Objective value = " + objective.value());
             for (MPVariable var : variables) {
-                System.out.println(var.name() + " = " + var.solutionValue());
+                solutionValues.append(var.name()).append("                  ").append(var.solutionValue()).append("\n");
+            }
+            objectiveValue = objective.value();
+            optimalSolution = true;
+        } else {
+            optimalSolution = false;
+        }
+        long wallTime = solver.wallTime();
+        long iterations = solver.iterations();
+
+        try {
+            String reportContent = "";
+            if (optimalSolution) {
+                // Now create the report screen based on this information and show it
+                reportContent = "==========================================================================\n" +
+                        "PROBLEM NAME:" + title + "\n" +
+                        "==========================================================================\n" +
+                        "SOLUTION:\n" +
+                        "==========================================================================\n" +
+                        "ITERATION NUMBER  " + iterations + " \n" +
+                        "\n" +
+                        "VARIABLE MIX       SOLUTION\n" +
+                        "------------       --------\n" +
+                        solutionValues.toString() +
+                        "\n" +
+                        " Z                " + objectiveValue + "\n";
+            } else {
+                reportContent = "Please double check your values entered.\n" +
+                                "Solver did not come to an optimal solution.";
             }
 
-        } else {
-            System.err.println("The problem does not have an optimal solution!");
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(getClass().getClassLoader().getResource("report.fxml"));
+
+            Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+            Stage stage = new Stage();
+            stage.setTitle("Report");
+            stage.setScene(scene);
+            stage.setResizable(false);
+            ReportController reportController = fxmlLoader.getController();
+            reportController.initData(reportContent);
+            reportController.generateReport();
+            stage.show();
+        } catch (IOException ie) {
+            throw new RuntimeException("Unable to open report screen: " + ie);
         }
 
-        System.out.println("\nAdvanced usage:");
-        System.out.println("Problem solved in " + solver.wallTime() + " milliseconds");
-        System.out.println("Problem solved in " + solver.iterations() + " iterations");
     }
 
 }

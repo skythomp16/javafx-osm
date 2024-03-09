@@ -14,7 +14,6 @@ public class Row {
     public enum Operator {
         GREATER(">="),
         LESS("<="),
-        EQUAL("="),
         EMPTY("");
 
         private final String symbol;
