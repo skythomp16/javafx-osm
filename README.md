@@ -1,6 +1,9 @@
 # OSM Software
 This software is written in JavaFX and is designed to replace the aging POM Software that has issues running on modern Windows.
 
+## Work In Progress
+This is a project that is very new and is a work in progress.  Currently only the linear programming module is created and working.
+
 ## Modules
 Right now, this application focuses on three main functions:
 - Linear Programming
